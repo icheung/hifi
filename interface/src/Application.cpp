@@ -503,6 +503,14 @@ Application::Application(int& argc, char** argv, QElapsedTimer &startup_time) :
         loadScripts();
     }
     
+    // Now that the scripts have been loaded, print the time elapsed since the
+    // application was started.
+    if (_justStarted) {
+        float startupTime = (float)_applicationStartupTime.elapsed() / 1000.0;
+        _justStarted = false;
+        qDebug("Startup time: %4.2f seconds.", startupTime);
+    }
+    
     loadSettings();
     int SAVE_SETTINGS_INTERVAL = 10 * MSECS_PER_SECOND; // Let's save every seconds for now
     connect(&_settingsTimer, &QTimer::timeout, this, &Application::saveSettings);
@@ -663,12 +671,6 @@ void Application::initializeGL() {
     connect(idleTimer, SIGNAL(timeout()), SLOT(idle()));
     idleTimer->start(0);
     _idleLoopStdev.reset();
-
-    if (_justStarted) {
-        float startupTime = (float)_applicationStartupTime.elapsed() / 1000.0;
-        _justStarted = false;
-        qDebug("Startup time: %4.2f seconds.", startupTime);
-    }
 
     // update before the first render
     update(1.0f / _fps);
